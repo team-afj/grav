@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Common\Data
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -246,7 +246,9 @@ class Validation
             return false;
         }
 
-        $max = (int)($params['max'] ?? 0);
+        $multiline = isset($params['multiline']) && $params['multiline'];
+
+        $max = (int)($params['max'] ?? ($multiline ? 65536 : 2048));
         if ($max && $len > $max) {
             return false;
         }
@@ -256,7 +258,7 @@ class Validation
             return false;
         }
 
-        if ((!isset($params['multiline']) || !$params['multiline']) && preg_match('/\R/um', $value)) {
+        if (!$multiline && preg_match('/\R/um', $value)) {
             return false;
         }
 
@@ -317,6 +319,10 @@ class Validation
      */
     public static function typeCommaList($value, array $params, array $field)
     {
+        if (!isset($params['max'])) {
+            $params['max'] = 2048;
+        }
+
         return is_array($value) ? true : self::typeText($value, $params, $field);
     }
 
@@ -379,6 +385,10 @@ class Validation
      */
     public static function typePassword($value, array $params, array $field)
     {
+        if (!isset($params['max'])) {
+            $params['max'] = 256;
+        }
+
         return self::typeText($value, $params, $field);
     }
 
@@ -540,7 +550,7 @@ class Validation
             $step = (float)$params['step'];
             // Count of how many steps we are above/below the minimum value.
             $pos = ($value - $min) / $step;
-
+            $pos = round($pos, 10);
             return is_int(static::filterNumber($pos, $params, $field));
         }
 
@@ -621,10 +631,18 @@ class Validation
      */
     public static function typeEmail($value, array $params, array $field)
     {
+        if (empty($value)) {
+            return false;
+        }
+
+        if (!isset($params['max'])) {
+            $params['max'] = 320;
+        }
+
         $values = !is_array($value) ? explode(',', preg_replace('/\s+/', '', $value)) : $value;
 
         foreach ($values as $val) {
-            if (!(self::typeText($val, $params, $field) && filter_var($val, FILTER_VALIDATE_EMAIL))) {
+            if (!(self::typeText($val, $params, $field) && strpos($val, '@', 1))) {
                 return false;
             }
         }
@@ -642,6 +660,10 @@ class Validation
      */
     public static function typeUrl($value, array $params, array $field)
     {
+        if (!isset($params['max'])) {
+            $params['max'] = 2048;
+        }
+
         return self::typeText($value, $params, $field) && filter_var($value, FILTER_VALIDATE_URL);
     }
 

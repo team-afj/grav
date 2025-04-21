@@ -3,12 +3,14 @@
 /**
  * @package    Grav\Framework\Form
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
 namespace Grav\Framework\Form;
 
+use Grav\Common\Security;
+use Grav\Common\Utils;
 use Grav\Framework\Psr7\Stream;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -27,6 +29,8 @@ use function sprintf;
 class FormFlashFile implements UploadedFileInterface, JsonSerializable
 {
     /** @var string */
+    private $id;
+    /** @var string */
     private $field;
     /** @var bool */
     private $moved = false;
@@ -43,6 +47,7 @@ class FormFlashFile implements UploadedFileInterface, JsonSerializable
      */
     public function __construct(string $field, array $upload, FormFlash $flash)
     {
+        $this->id = $flash->getId() ?: $flash->getUniqueId();
         $this->field = $field;
         $this->upload = $upload;
         $this->flash = $flash;
@@ -103,6 +108,11 @@ class FormFlashFile implements UploadedFileInterface, JsonSerializable
         if ($filename) {
             $this->flash->removeFile($filename, $this->field);
         }
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     /**
@@ -183,6 +193,21 @@ class FormFlashFile implements UploadedFileInterface, JsonSerializable
     }
 
     /**
+     * @return void
+     */
+    public function checkXss(): void
+    {
+        $tmpFile = $this->getTmpFile();
+        $mime = $this->getClientMediaType();
+        if (Utils::contains($mime, 'svg', false)) {
+            $response = Security::detectXssFromSvgFile($tmpFile);
+            if ($response) {
+                throw new RuntimeException(sprintf('SVG file XSS check failed on %s', $response));
+            }
+        }
+    }
+
+    /**
      * @return string|null
      */
     public function getTmpFile(): ?string
@@ -205,6 +230,7 @@ class FormFlashFile implements UploadedFileInterface, JsonSerializable
     public function __debugInfo()
     {
         return [
+            'id:private' => $this->id,
             'field:private' => $this->field,
             'moved:private' => $this->moved,
             'upload:private' => $this->upload,

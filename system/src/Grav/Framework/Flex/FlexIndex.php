@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Framework\Flex
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -162,6 +162,10 @@ class FlexIndex extends ObjectIndex implements FlexIndexInterface
      */
     public function search(string $search, $properties = null, array $options = null)
     {
+        $directory = $this->getFlexDirectory();
+        $properties = $directory->getSearchProperties($properties);
+        $options = $directory->getSearchOptions($options);
+
         return $this->__call('search', [$search, $properties, $options]);
     }
 

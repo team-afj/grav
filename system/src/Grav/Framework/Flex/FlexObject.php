@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Framework\Flex
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -287,17 +287,9 @@ class FlexObject implements FlexObjectInterface, FlexAuthorizeInterface
      */
     public function search(string $search, $properties = null, array $options = null): float
     {
-        $properties = (array)($properties ?? $this->getFlexDirectory()->getConfig('data.search.fields'));
-        if (!$properties) {
-            $fields = $this->getFlexDirectory()->getConfig('admin.views.list.fields') ?? $this->getFlexDirectory()->getConfig('admin.list.fields', []);
-            foreach ($fields as $property => $value) {
-                if (!empty($value['link'])) {
-                    $properties[] = $property;
-                }
-            }
-        }
-
-        $options = $options ?? (array)$this->getFlexDirectory()->getConfig('data.search.options');
+        $directory = $this->getFlexDirectory();
+        $properties = $directory->getSearchProperties($properties);
+        $options = $directory->getSearchOptions($options);
 
         $weight = 0;
         foreach ($properties as $property) {
@@ -635,7 +627,8 @@ class FlexObject implements FlexObjectInterface, FlexAuthorizeInterface
                 ] + $context
             );
 
-            if ($debugger->enabled()) {
+            if ($debugger->enabled() &&
+                !($grav['uri']->getContentType() === 'application/json' || $grav['uri']->extension() === 'json')) {
                 $name = $this->getKey() . ' (' . $type . ')';
                 $output = "\n<!–– START {$name} object ––>\n{$output}\n<!–– END {$name} object ––>\n";
             }

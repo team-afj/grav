@@ -3,13 +3,14 @@
 /**
  * @package    Grav\Console\Cli
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
 namespace Grav\Console\Cli;
 
 use Grav\Common\Filesystem\Folder;
+use Grav\Common\Utils;
 use Grav\Console\GravCommand;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -301,7 +302,7 @@ class SandboxCommand extends GravCommand
 
         foreach ($binaries as $bin) {
             chmod($bin, $dir_perms);
-            $io->writeln('    <cyan>bin/' . basename($bin) . '</cyan> permissions reset to ' . decoct($dir_perms));
+            $io->writeln('    <cyan>bin/' . Utils::basename($bin) . '</cyan> permissions reset to ' . decoct($dir_perms));
         }
 
         $io->newLine();

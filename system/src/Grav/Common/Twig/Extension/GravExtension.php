@@ -3,12 +3,13 @@
 /**
  * @package    Grav\Common\Twig
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
 namespace Grav\Common\Twig\Extension;
 
+use CallbackFilterIterator;
 use Cron\CronExpression;
 use Grav\Common\Config\Config;
 use Grav\Common\Data\Data;
@@ -22,6 +23,7 @@ use Grav\Common\Page\Media;
 use Grav\Common\Scheduler\Cron;
 use Grav\Common\Security;
 use Grav\Common\Twig\TokenParser\TwigTokenParserCache;
+use Grav\Common\Twig\TokenParser\TwigTokenParserLink;
 use Grav\Common\Twig\TokenParser\TwigTokenParserRender;
 use Grav\Common\Twig\TokenParser\TwigTokenParserScript;
 use Grav\Common\Twig\TokenParser\TwigTokenParserStyle;
@@ -40,9 +42,11 @@ use JsonSerializable;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Traversable;
 use Twig\Environment;
+use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\Loader\FilesystemLoader;
+use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 use function array_slice;
@@ -115,6 +119,7 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('defined', [$this, 'definedDefaultFilter']),
             new TwigFilter('ends_with', [$this, 'endsWithFilter']),
             new TwigFilter('fieldName', [$this, 'fieldNameFilter']),
+            new TwigFilter('parent_field', [$this, 'fieldParentFilter']),
             new TwigFilter('ksort', [$this, 'ksortFilter']),
             new TwigFilter('ltrim', [$this, 'ltrimFilter']),
             new TwigFilter('markdown', [$this, 'markdownFunction'], ['needs_context' => true, 'is_safe' => ['html']]),
@@ -143,6 +148,7 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('yaml_encode', [$this, 'yamlEncodeFilter']),
             new TwigFilter('yaml_decode', [$this, 'yamlDecodeFilter']),
             new TwigFilter('nicecron', [$this, 'niceCronFilter']),
+            new TwigFilter('replace_last', [$this, 'replaceLastFilter']),
 
             // Translations
             new TwigFilter('t', [$this, 'translate'], ['needs_environment' => true]),
@@ -164,6 +170,11 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             // PHP methods
             new TwigFilter('count', 'count'),
             new TwigFilter('array_diff', 'array_diff'),
+
+            // Security fixes
+            new TwigFilter('filter', [$this, 'filterFunc'], ['needs_environment' => true]),
+            new TwigFilter('map', [$this, 'mapFunc'], ['needs_environment' => true]),
+            new TwigFilter('reduce', [$this, 'reduceFunc'], ['needs_environment' => true]),
         ];
     }
 
@@ -192,6 +203,7 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('gist', [$this, 'gistFunc']),
             new TwigFunction('nonce_field', [$this, 'nonceFieldFunc']),
             new TwigFunction('pathinfo', 'pathinfo'),
+            new TwigFunction('parseurl', 'parse_url'),
             new TwigFunction('random_string', [$this, 'randomStringFunc']),
             new TwigFunction('repeat', [$this, 'repeatFunc']),
             new TwigFunction('regex_replace', [$this, 'regexReplace']),
@@ -238,6 +250,12 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('is_object', 'is_object'),
             new TwigFunction('count', 'count'),
             new TwigFunction('array_diff', 'array_diff'),
+            new TwigFunction('parse_url', 'parse_url'),
+
+            // Security fixes
+            new TwigFunction('filter', [$this, 'filterFunc'], ['needs_environment' => true]),
+            new TwigFunction('map', [$this, 'mapFunc'], ['needs_environment' => true]),
+            new TwigFunction('reduce', [$this, 'reduceFunc'], ['needs_environment' => true]),
         ];
     }
 
@@ -252,12 +270,17 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             new TwigTokenParserTryCatch(),
             new TwigTokenParserScript(),
             new TwigTokenParserStyle(),
+            new TwigTokenParserLink(),
             new TwigTokenParserMarkdown(),
             new TwigTokenParserSwitch(),
             new TwigTokenParserCache(),
         ];
     }
 
+    /**
+     * @param mixed $var
+     * @return string
+     */
     public function print_r($var)
     {
         return print_r($var, true);
@@ -274,6 +297,20 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
         $path = explode('.', rtrim($str, '.'));
 
         return array_shift($path) . ($path ? '[' . implode('][', $path) . ']' : '');
+    }
+
+    /**
+     * Filters field name by changing dot notation into array notation.
+     *
+     * @param  string $str
+     * @return string
+     */
+    public function fieldParentFilter($str)
+    {
+        $path = explode('.', rtrim($str, '.'));
+        array_pop($path);
+
+        return implode('.', $path);
     }
 
     /**
@@ -440,7 +477,7 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
      */
     public function base64EncodeFilter($str)
     {
-        return base64_encode($str);
+        return base64_encode((string) $str);
     }
 
     /**
@@ -524,6 +561,21 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
     {
         $cron = new Cron($at);
         return $cron->getText('en');
+    }
+
+    /**
+     * @param string|mixed $str
+     * @param string $search
+     * @param string $replace
+     * @return string|mixed
+     */
+    public function replaceLastFilter($str, $search, $replace)
+    {
+        if (is_string($str) && ($pos = mb_strrpos($str, $search)) !== false) {
+            $str = mb_substr($str, 0, $pos) . $replace . mb_substr($str, $pos + mb_strlen($search));
+        }
+
+        return $str;
     }
 
     /**
@@ -861,8 +913,14 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             return $this->grav['admin']->translate($args, $lang);
         }
 
-        // else use the default grav translate functionality
-        return $this->grav['language']->translate($args);
+        $translation = $this->grav['language']->translate($args);
+
+        if ($this->config->get('system.languages.debug', false)) {
+            $debugger = $this->grav['debugger'];
+            $debugger->addMessage("$args[0] -> $translation", 'debug');
+        }
+
+        return $translation;
     }
 
     /**
@@ -906,7 +964,7 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
      */
     public function repeatFunc($input, $multiplier)
     {
-        return str_repeat($input, $multiplier);
+        return str_repeat($input, (int) $multiplier);
     }
 
     /**
@@ -1160,6 +1218,9 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
      */
     public function jsonDecodeFilter($str, $assoc = false, $depth = 512, $options = 0)
     {
+        if ($str === null) {
+            $str = '';
+        }
         return json_decode(html_entity_decode($str, ENT_COMPAT | ENT_HTML401, 'UTF-8'), $assoc, $depth, $options);
     }
 
@@ -1171,7 +1232,13 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
      */
     public function getCookie($key)
     {
-        return filter_input(INPUT_COOKIE, $key, FILTER_SANITIZE_STRING);
+        $cookie_value = filter_input(INPUT_COOKIE, $key);
+
+        if ($cookie_value === null) {
+            return null;
+        }
+
+        return htmlspecialchars(strip_tags($cookie_value), ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -1637,5 +1704,53 @@ class GravExtension extends AbstractExtension implements GlobalsInterface
             case 'string':
                 return is_string($var);
         }
+    }
+
+    /**
+     * @param Environment $env
+     * @param array $array
+     * @param callable|string $arrow
+     * @return array|CallbackFilterIterator
+     * @throws RuntimeError
+     */
+    function filterFunc(Environment $env, $array, $arrow)
+    {
+        if (!$arrow instanceof \Closure && !is_string($arrow) || Utils::isDangerousFunction($arrow)) {
+            throw new RuntimeError('Twig |filter("' . $arrow . '") is not allowed.');
+        }
+
+        return twig_array_filter($env, $array, $arrow);
+    }
+
+    /**
+     * @param Environment $env
+     * @param array $array
+     * @param callable|string $arrow
+     * @return array|CallbackFilterIterator
+     * @throws RuntimeError
+     */
+    function mapFunc(Environment $env, $array, $arrow)
+    {
+        if (!$arrow instanceof \Closure && !is_string($arrow) || Utils::isDangerousFunction($arrow)) {
+            throw new RuntimeError('Twig |map("' . $arrow . '") is not allowed.');
+        }
+
+        return twig_array_map($env, $array, $arrow);
+    }
+
+    /**
+     * @param Environment $env
+     * @param array $array
+     * @param callable|string $arrow
+     * @return array|CallbackFilterIterator
+     * @throws RuntimeError
+     */
+    function reduceFunc(Environment $env, $array, $arrow)
+    {
+        if (!$arrow instanceof \Closure && !is_string($arrow) || Utils::isDangerousFunction($arrow)) {
+            throw new RuntimeError('Twig |reduce("' . $arrow . '") is not allowed.');
+        }
+
+        return twig_array_map($env, $array, $arrow);
     }
 }

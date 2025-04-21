@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Framework\Form
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -23,6 +23,7 @@ use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Compat\Serializable;
 use Grav\Framework\ContentBlock\HtmlBlock;
+use Grav\Framework\Form\FormFlashFile;
 use Grav\Framework\Form\Interfaces\FormFlashInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Session\SessionInterface;
@@ -452,9 +453,9 @@ trait FormTrait
                 'session_id' => $this->getSessionId(),
                 'unique_id' => $this->getUniqueId(),
                 'form_name' => $this->getName(),
-                'folder' => $this->getFlashFolder()
+                'folder' => $this->getFlashFolder(),
+                'id' => $this->getFlashId()
             ];
-
 
             $this->flash = new FormFlash($config);
             $this->flash->setUrl($grav['uri']->url)->setUser($grav['user'] ?? null);
@@ -485,7 +486,8 @@ trait FormTrait
                 'session_id' => $this->getSessionId(),
                 'unique_id' => $uniqueId,
                 'form_name' => $name,
-                'folder' => $this->getFlashFolder()
+                'folder' => $this->getFlashFolder(),
+                'id' => $this->getFlashId()
             ];
             $flash = new FormFlash($config);
             if ($flash->exists() && $flash->getFormName() === $name) {
@@ -603,6 +605,28 @@ trait FormTrait
             '[USERNAME]' => $username ?? '!!',
             '[USERNAME_OR_SESSIONID]' => $username ?? $sessionId ?? '!!',
             '[ACCOUNT]' => $mediaFolder ?? '!!'
+        ];
+
+        $flashLookupFolder = $this->getFlashLookupFolder();
+
+        $path = str_replace(array_keys($dataMap), array_values($dataMap), $flashLookupFolder);
+
+        // Make sure we only return valid paths.
+        return strpos($path, '!!') === false ? rtrim($path, '/') : null;
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getFlashId(): ?string
+    {
+        // Fill template token keys/value pairs.
+        $dataMap = [
+            '[FORM_NAME]' => $this->getName(),
+            '[SESSIONID]' => 'session',
+            '[USERNAME]' => '!!',
+            '[USERNAME_OR_SESSIONID]' => '!!',
+            '[ACCOUNT]' => 'account'
         ];
 
         $flashLookupFolder = $this->getFlashLookupFolder();
@@ -775,12 +799,15 @@ trait FormTrait
     {
         // Handle bad filenames.
         $filename = $file->getClientFilename();
-
         if ($filename && !Utils::checkFilename($filename)) {
             $grav = Grav::instance();
             throw new RuntimeException(
                 sprintf($grav['language']->translate('PLUGIN_FORM.FILEUPLOAD_UNABLE_TO_UPLOAD', null, true), $filename, 'Bad filename')
             );
+        }
+
+        if ($file instanceof FormFlashFile) {
+            $file->checkXss();
         }
     }
 

@@ -141,6 +141,7 @@ assets:
   js_pipeline: false
   js_pipeline_include_externals: true
   js_pipeline_before_excludes: true
+  js_module_pipeline: false
   js_minify: true
   enable_asset_timestamp: false
   enable_asset_sri: false

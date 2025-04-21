@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Common\Media
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -100,6 +100,10 @@ trait MediaUploadTrait
             'size' => $uploadedFile->getSize(),
         ];
 
+        if ($uploadedFile instanceof FormFlashFile) {
+            $uploadedFile->checkXss();
+        }
+
         return $this->checkFileMetadata($metadata, $filename, $settings);
     }
 
@@ -132,9 +136,9 @@ trait MediaUploadTrait
             if ($folder === '.') {
                 $folder = '';
             }
-            $filename = basename($filename);
+            $filename = Utils::basename($filename);
         }
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $extension = Utils::pathinfo($filename, PATHINFO_EXTENSION);
 
         // Decide which filename to use.
         if ($settings['random_name']) {
@@ -152,7 +156,7 @@ trait MediaUploadTrait
         $filepath = $folder . $filename;
 
         // Check if the filename is allowed.
-        if (!Utils::checkFilename($filename)) {
+        if (!Utils::checkFilename($filepath)) {
             throw new RuntimeException(
                 sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filepath, $this->translate('PLUGIN_ADMIN.BAD_FILENAME'))
             );
@@ -573,6 +577,8 @@ trait MediaUploadTrait
                 }
             }
         }
+
+        $this->hide($filename);
     }
 
     /**

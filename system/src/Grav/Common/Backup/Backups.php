@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Common\Backup
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -104,8 +104,8 @@ class Backups
      */
     public function getBackupDownloadUrl($backup, $base_url)
     {
-        $param_sep = $param_sep = Grav::instance()['config']->get('system.param_sep', ':');
-        $download = urlencode(base64_encode(basename($backup)));
+        $param_sep = Grav::instance()['config']->get('system.param_sep', ':');
+        $download = urlencode(base64_encode(Utils::basename($backup)));
         $url      = rtrim(Grav::instance()['uri']->rootUrl(true), '/') . '/' . trim(
             $base_url,
             '/'
@@ -218,7 +218,7 @@ class Backups
         if ($locator->isStream($backup_root)) {
             $backup_root = $locator->findResource($backup_root);
         } else {
-            $backup_root = rtrim(GRAV_ROOT . $backup_root, '/');
+            $backup_root = rtrim(GRAV_ROOT . $backup_root, DS) ?: DS;
         }
 
         if (!$backup_root || !file_exists($backup_root)) {

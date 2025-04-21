@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Common
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -206,7 +206,7 @@ class Uri
         $uri = $language->setActiveFromUri($uri);
 
         // split the URL and params (and make sure that the path isn't seen as domain)
-        $bits = parse_url('http://domain.com' . $uri);
+        $bits = static::parseUrl('http://domain.com' . $uri);
 
         //process fragment
         if (isset($bits['fragment'])) {
@@ -217,7 +217,7 @@ class Uri
         $path = $bits['path'] ?? '/';
 
         // remove the extension if there is one set
-        $parts = pathinfo($path);
+        $parts = Utils::pathinfo($path);
 
         // set the original basename
         $this->basename = $parts['basename'];
@@ -264,6 +264,7 @@ class Uri
 
         return $this->paths;
     }
+
 
     /**
      * Return route to the current URI. By default route doesn't include base path.
@@ -742,7 +743,7 @@ class Uri
      */
     public static function isExternal($url)
     {
-        return (0 === strpos($url, 'http://') || 0 === strpos($url, 'https://') || 0 === strpos($url, '//'));
+        return (0 === strpos($url, 'http://') || 0 === strpos($url, 'https://') || 0 === strpos($url, '//') || 0 === strpos($url, 'mailto:') || 0 === strpos($url, 'tel:') || 0 === strpos($url, 'ftp://') || 0 === strpos($url, 'ftps://') || 0 === strpos($url, 'news:') || 0 === strpos($url, 'irc:') || 0 === strpos($url, 'gopher:') || 0 === strpos($url, 'nntp:') || 0 === strpos($url, 'feed:') || 0 === strpos($url, 'cvs:') || 0 === strpos($url, 'ssh:') || 0 === strpos($url, 'git:') || 0 === strpos($url, 'svn:') || 0 === strpos($url, 'hg:'));
     }
 
     /**
@@ -854,7 +855,7 @@ class Uri
                 }
 
                 if ($full_path) {
-                    $path_info = pathinfo($full_path);
+                    $path_info = Utils::pathinfo($full_path);
                     $page_path = $path_info['dirname'];
                     $filename = '';
 
@@ -899,7 +900,7 @@ class Uri
             $routes = $pages->routes();
 
             // if this is an image, get the proper path
-            $url_bits = pathinfo($url_path);
+            $url_bits = Utils::pathinfo($url_path);
             if (isset($url_bits['extension'])) {
                 $target_path = $url_bits['dirname'];
             } else {
@@ -954,9 +955,7 @@ class Uri
         $grav = Grav::instance();
 
         // Remove extra slash from streams, parse_url() doesn't like it.
-        if ($pos = strpos($url, ':///')) {
-            $url = substr_replace($url, '://', $pos, 4);
-        }
+        $url = preg_replace('/([^:])(\/{2,})/', '$1/', $url);
 
         $encodedUrl = preg_replace_callback(
             '%[^:/@?&=#]+%usD',
@@ -1005,7 +1004,7 @@ class Uri
             foreach ($matches as $match) {
                 $param = explode($delimiter, $match[1]);
                 if (count($param) === 2) {
-                    $plain_var = filter_var(rawurldecode($param[1]), FILTER_SANITIZE_STRING);
+                    $plain_var = htmlspecialchars(strip_tags(rawurldecode($param[1])), ENT_QUOTES, 'UTF-8');
                     $params[$param[0]] = $plain_var;
                     $uri = str_replace($match[0], '', $uri);
                 }
@@ -1046,7 +1045,7 @@ class Uri
         $base_url = rtrim($base . $grav['pages']->base(), '/') . $language_append;
 
         // if absolute and starts with a base_url move on
-        if (pathinfo($markdown_url, PATHINFO_DIRNAME) === '.' && $page->url() === '/') {
+        if (Utils::pathinfo($markdown_url, PATHINFO_DIRNAME) === '.' && $page->url() === '/') {
             return '/' . $markdown_url;
         }
         // no path to convert
@@ -1085,7 +1084,7 @@ class Uri
             return $normalized_url;
         }
 
-        $path_info = pathinfo($full_path);
+        $path_info = Utils::pathinfo($full_path);
         $page_path = $path_info['dirname'];
         $filename = '';
 
@@ -1388,7 +1387,11 @@ class Uri
         if ($this->post && null !== $element) {
             $item = Utils::getDotNotation($this->post, $element);
             if ($filter_type) {
-                $item = filter_var($item, $filter_type);
+                if ($filter_type === FILTER_SANITIZE_STRING || $filter_type === GRAV_SANITIZE_STRING) {
+                    $item = htmlspecialchars(strip_tags($item), ENT_QUOTES, 'UTF-8');
+                } else {
+                    $item = filter_var($item, $filter_type);
+                }
             }
             return $item;
         }
@@ -1404,14 +1407,13 @@ class Uri
      */
     public function getContentType($short = true)
     {
-        if (isset($_SERVER['CONTENT_TYPE'])) {
-            $content_type = $_SERVER['CONTENT_TYPE'];
+       $content_type = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? $_SERVER['HTTP_ACCEPT'] ?? null;
+        if ($content_type) {
             if ($short) {
                 return Utils::substrToString($content_type, ';');
             }
-            return $content_type;
         }
-        return null;
+        return $content_type;
     }
 
     /**
@@ -1514,7 +1516,7 @@ class Uri
             foreach ($matches as $match) {
                 $param = explode($delimiter, $match[1]);
                 if (count($param) === 2) {
-                    $plain_var = filter_var($param[1], FILTER_SANITIZE_STRING);
+                    $plain_var = htmlspecialchars(strip_tags($param[1]), ENT_QUOTES, 'UTF-8');
                     $this->params[$param[0]] = $plain_var;
                     $uri = str_replace($match[0], '', $uri);
                 }

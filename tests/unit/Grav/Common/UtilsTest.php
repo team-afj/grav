@@ -131,8 +131,8 @@ class UtilsTest extends \Codeception\TestCase\Test
 
         $objMerged = Utils::mergeObjects($obj1, $obj2);
 
-        self::assertObjectHasAttribute('test1', $objMerged);
-        self::assertObjectHasAttribute('test2', $objMerged);
+        self::arrayHasKey('test1', (array) $objMerged);
+        self::arrayHasKey('test2', (array) $objMerged);
     }
 
     public function testDateFormats(): void
@@ -461,7 +461,7 @@ class UtilsTest extends \Codeception\TestCase\Test
         self::assertSame('pop://domain.com', Utils::url('pop://domain.com'));
         self::assertSame('foo://bar/baz', Utils::url('foo://bar/baz'));
         self::assertSame('foo://bar/baz', Utils::url('foo://bar/baz', true));
-        // self::assertSame('mailto:joe@domain.com', Utils::url('mailto:joe@domain.com', true)); // FIXME <-
+        self::assertSame('mailto:joe@domain.com', Utils::url('mailto:joe@domain.com', true)); // FIXME <-
     }
 
     public function testUrlWithRoot(): void
@@ -502,22 +502,26 @@ class UtilsTest extends \Codeception\TestCase\Test
         self::assertSame('http://testing.dev/subdir/path1/path2/foobar.jpg', Utils::url('/path1/path2/foobar.jpg', true));
         self::assertSame('http://testing.dev/subdir/random/path1/path2/foobar.jpg', Utils::url('/random/path1/path2/foobar.jpg', true));
 
-        // Paths including the grav base.
+        // Absolute Paths including the grav base.
         self::assertSame('/subdir/', Utils::url('/subdir'));
+        self::assertSame('/subdir/', Utils::url('/subdir/'));
         self::assertSame('/subdir/path1', Utils::url('/subdir/path1'));
         self::assertSame('/subdir/path1/path2', Utils::url('/subdir/path1/path2'));
         self::assertSame('/subdir/foobar.jpg', Utils::url('/subdir/foobar.jpg'));
         self::assertSame('/subdir/path1/foobar.jpg', Utils::url('/subdir/path1/foobar.jpg'));
 
-        // Relative paths from Grav root with domain.
+        // Absolute paths from Grav root with domain.
         self::assertSame('http://testing.dev/subdir/', Utils::url('/subdir', true));
+        self::assertSame('http://testing.dev/subdir/', Utils::url('/subdir/', true));
         self::assertSame('http://testing.dev/subdir/path1', Utils::url('/subdir/path1', true));
         self::assertSame('http://testing.dev/subdir/path1/path2', Utils::url('/subdir/path1/path2', true));
         self::assertSame('http://testing.dev/subdir/foobar.jpg', Utils::url('/subdir/foobar.jpg', true));
         self::assertSame('http://testing.dev/subdir/path1/foobar.jpg', Utils::url('/subdir/path1/foobar.jpg', true));
 
         // Relative paths from Grav root.
+        self::assertSame('/subdir/sub', Utils::url('/sub'));
         self::assertSame('/subdir/subdir', Utils::url('subdir'));
+        self::assertSame('/subdir/subdir2/sub', Utils::url('/subdir2/sub'));
         self::assertSame('/subdir/subdir/path1', Utils::url('subdir/path1'));
         self::assertSame('/subdir/subdir/path1/path2', Utils::url('subdir/path1/path2'));
         self::assertSame('/subdir/path1', Utils::url('path1'));
@@ -557,6 +561,7 @@ class UtilsTest extends \Codeception\TestCase\Test
         $config->set('security.uploads_dangerous_extensions', ['php', 'html', 'htm', 'exe', 'js']);
 
         self::assertFalse(Utils::checkFilename('foo.php'));
+        self::assertFalse(Utils::checkFilename('foo.PHP'));
         self::assertFalse(Utils::checkFilename('bar.js'));
 
         self::assertTrue(Utils::checkFilename('foo.json'));

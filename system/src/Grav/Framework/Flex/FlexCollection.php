@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Framework\Flex
  *
- * @copyright  Copyright (c) 2015 - 2022 Trilby Media, LLC. All rights reserved.
+ * @copyright  Copyright (c) 2015 - 2024 Trilby Media, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -147,6 +147,10 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
      */
     public function search(string $search, $properties = null, array $options = null)
     {
+        $directory = $this->getFlexDirectory();
+        $properties = $directory->getSearchProperties($properties);
+        $options = $directory->getSearchOptions($options);
+
         $matching = $this->call('search', [$search, $properties, $options]);
         $matching = array_filter($matching);
 
@@ -436,7 +440,8 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
                 ] + $context
             );
 
-            if ($debugger->enabled()) {
+            if ($debugger->enabled() &&
+                !($grav['uri']->getContentType() === 'application/json' || $grav['uri']->extension() === 'json')) {
                 $output = "\n<!–– START {$type} collection ––>\n{$output}\n<!–– END {$type} collection ––>\n";
             }
 
