@@ -15,6 +15,10 @@ git:
         url: https://github.com/Perlkonig/grav-plugin-twig-extensions
         path: user/plugins/twig-extensions
         branch: master
+    shortcode-core:
+        url: https://github.com/getgrav/grav-plugin-shortcode-core
+        path: user/plugins/shortcode-core
+        branch: master
     shortcode-gallery-plusplus:
         url: https://github.com/sal0max/grav-plugin-shortcode-gallery-plusplus
         path: user/plugins/shortcode-gallery-plusplus
