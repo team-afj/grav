@@ -32,9 +32,11 @@ Voici la liste des liens vers les associations organisatrices de conventions de 
 
 [Jongle & Rit / Bigoud’N’Jongle / Vezin le coquet](https://jongleetrit.wordpress.com/?target=_blank)
 
-[Jongl’ ô Païs / Vanosc](https://fr-fr.facebook.com/JOP07690/?target=_blank)
+[Jongl’ ô Païs (JOP) / Vanosc](https://fr-fr.facebook.com/JOP07690/?target=_blank)
 
 [Juggling Virtual Convention (JVC) / Discord](https://www.facebook.com/jugglingvirtualconvention/?target=_blank)
+
+[La Jon'Guill'Rit / Guillestre](https://www.facebook.com/events/3035143140134553/?target=_blank)
 
 [Lez Hérault de la jongle / Balles à Lez / Montpellier](https://organise.bim.land/events/ba71e547-3a9c-4b5d-96eb-157e98675463/?target=_blank)
 
@@ -44,15 +46,13 @@ Voici la liste des liens vers les associations organisatrices de conventions de 
 
 [MJC 3 Maisons / Bibasse / Nancy](https://www.mjc3maisons.fr/?target=_blank)
 
-[NLC / La guinguette du jongleur / Nonville](http://assonlc.free.fr/?target=_blank)
-
 [Par Haz’art / Boudu la jongle / Toulouse](https://www.parhazart.org/?target=_blank)
 
 [Pass’moi L’Cirk / Tour de Pass Pass / Tours](http://passmoilcirk.blogspot.com/?target=_blank)
 
 [Zik en Piste / Jongle en Zik / Carpentras](https://www.zikenpiste.com/?target=_blank)
 
-Zmam / Roca Balles / Vabre
+Zmam / RocaBalle / Vabre et Mazamet
 
 
 ### Les associations des conventions régionales en sommeil ou disparues
@@ -96,6 +96,8 @@ Les Jongleurs d'Oriant / Oriant’à Jongle / Larmor-Plage
 Les Tapirroulants / Hopla / Strasbourg
 
 [Maraboule / En Maine Ta Jongle / Angers](http://maraboule.blogspot.com/?target=_blank)
+
+[NLC / La guinguette du jongleur / Nonville](http://assonlc.free.fr/?target=_blank)
 
 [Pyrocircus / Glühwein / Strasbourg](http://troupe-pyrocircus.fr/?target=_blank)
 

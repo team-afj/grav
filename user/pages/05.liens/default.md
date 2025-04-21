@@ -8,8 +8,8 @@ metadata:
 
 ## Liens
 
-Suivez l'AFJ sur ~~Sheitan.com~~ (euh... sur) le [facebook de
-l'AFJ](https://www.facebook.com/asso.afj?target=_blank) et contactez-nous à
+Vous pouvez nous suivre sur le [facebook de
+l'AFJ](https://www.facebook.com/asso.afj?target=_blank) et nous contacter à
 l'adresse [afj.jonglerie@gmail.com](mailto:afj.jonglerie@gmail.com).
 
 ### Sites généralistes francophones
@@ -22,6 +22,7 @@ l'adresse [afj.jonglerie@gmail.com](mailto:afj.jonglerie@gmail.com).
 - [Jongle.net](http://www.jongle.net/?target=_blank)
 - [Jonglerie et Jonglages](https://www.gentlemanjongleur.com/jonglerieetjonglages/objets.html?target=_blank)
 - [Juggle Master](https://www.jugglemaster.fr/?target=_blank)
+- [Jugglers Mastodon instance](https://jugglers.network/?target=_blank)
 - [Le carnet du CCCirque](https://cccirque.hypotheses.org/?target=_blank)
 - [Maison des Jonglages](http://maisondesjonglages.fr/fr?target=_blank)
 
@@ -37,6 +38,7 @@ l'adresse [afj.jonglerie@gmail.com](mailto:afj.jonglerie@gmail.com).
 - [Juggling Magazine (Italien)](https://www.jugglingmagazine.it/home/?target=_blank)
 - [Kaskade - The European Juggling Magazine](https://www.facebook.com/Kaskade.mag?target=_blank)
 - [The Catch - The UK's Juggling Magazine](http://www.jugglingmagazines.com/?target=_blank)
+- [The Museum of Juggling History](https://historicaljugglingprops.com/?target=_blank)
 - [Zirkolika - Revista de las Artes Circenses (Espagnol)](https://zirkolika.com/?target=_blank)
 
 ### Sites spécifiques
@@ -55,6 +57,7 @@ l'adresse [afj.jonglerie@gmail.com](mailto:afj.jonglerie@gmail.com).
 - [Juggloid](http://www.juggloid.com/?target=_blank)
 - [Kendama France](https://www.kendama-france.com/?target=_blank)
 - [Le Jonglage avec balles](http://didier.arlabosse.free.fr/balles/index.html?target=_blank)
+- [Library of Juggling](https://www.libraryofjuggling.com/?target=_blank)
 - [Monocycle.info](https://monocycle.info/tag/convention/?target=_blank)
 - [Roulemaboule](https://roulemabouleasso.wordpress.com/2018/09/11/liens/?target=_blank)
 - [Siteswap.org](http://www.siteswap.org/?target=_blank)
@@ -102,14 +105,13 @@ l'adresse [afj.jonglerie@gmail.com](mailto:afj.jonglerie@gmail.com).
 - [Firetoys](https://www.firetoys.co.uk/?target=_blank)
 - [Flow Juggle](https://fr.flowjuggle.com/?target=_blank)
 - [Flowtoys](https://flowtoys.com/?target=_blank)
-- [Henrys](https://henrys.fr/?target=_blank)
 - [Home of Poï](https://www.homeofpoi.com/fr/?target=_blank)
 - [Hoopologie](https://www.hoopologie.com/?target=_blank)
 - [K8 Juggling Store](https://k8juggling.com/en/?target=_blank)
-- [La Ribouldingue](https://www.laribouldingue.com/?target=_blank)
+- [La Ribouldingue - Henrys France](https://www.laribouldingue.com/?target=_blank)
 - [Lighttoys](https://www.lighttoys.cz/product/led-juggling-club-ft/?target=_blank)
 - [Mister Babache](https://www.jonglerie.com/?target=_blank)
-- [Net Jugglers](https://www.netjuggler.net/?target=_blank)
+- [NetJuggler](https://www.netjuggler.net/?target=_blank)
 - [Oddballs](https://www.oddballs.co.uk/?target=_blank)
 - [Play](https://www.playjuggling.com/en/?target=_blank)
 - [Renegade Juggling](https://www.renegadejuggling.com/?target=_blank)
