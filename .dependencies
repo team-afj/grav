@@ -48,6 +48,10 @@ links:
         src: grav-plugin-twig-extensions
         path: user/plugins/twig-extensions
         scm: github
+    shortcode-core:
+        url: grav-plugin-shortcode-core
+        path: user/plugins/shortcode-core
+        scm: github
     shortcode-gallery-plusplus:
         src: grav-plugin-shortcode-gallery-plusplus
         path: user/plugins/shortcode-gallery-plusplus
